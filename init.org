@@ -7,7 +7,7 @@ Emacs literate configuration
 - I customize Emacs to work mostly like a normal text editor: using C-c and C-v for copy/paste, shift selection, etc. Then I add advanced Emacs features on top.
 - One frame (window) and one buffer active at a time. No splits, no panels, no pop-ups: unless it's absolutely necessary.
 
-* Building from source
+* Build from source
 Configuration flags
 #+BEGIN_SRC sh
 ./configure --with-native-compilation=aot \
@@ -791,10 +791,14 @@ Set font function.
 (defun de/set-font ()
   (interactive)
   (setq de-font "Iosevka Custom"
-        de-font-height 150)
+  de-font-height 145)
+  ;; (setq de-font "Monaspace Xenon Frozen:style=Regular"
+  ;; de-font-height 140)
   (set-face-attribute 'default nil        :font de-font :height de-font-height)
   (set-face-attribute 'fixed-pitch nil    :font de-font :height de-font-height)
   (set-face-attribute 'variable-pitch nil :font de-font :height de-font-height))
+
+  ;; (setq default-text-properties '(line-spacing 0.25 line-height 1.25)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -928,7 +932,9 @@ Make the backspace properly erase the tab instead ofremoving 1 space at a time.
   :ensure t
   :defer t
   :hook ((python-ts-mode . eglot-ensure)
-         (go-ts-mode . eglot-ensure)))
+         (go-ts-mode . eglot-ensure))
+  :config
+  (setq eldoc-echo-area-use-multiline-p nil))
 #+END_SRC
 
 *** Go
@@ -1195,68 +1201,68 @@ Uses `nerd-icons-octicon' to fetch the icon."
 (advice-add 'doom-modeline-update-vcs :override 'de/doom-modeline-update-vcs)
 
 
-(defvar-local doom-modeline--flymake nil)
+;; (defvar-local doom-modeline--flymake nil)
 
-(defun de/doom-modeline-update-flymake (&rest _)
-  "Update flymake."
-  (setq doom-modeline--flymake
-        (let* ((known (hash-table-keys flymake--state))
-               (running (flymake-running-backends))
-               (disabled (flymake-disabled-backends))
-               (reported (flymake-reporting-backends))
-               (all-disabled (and disabled (null running)))
-               (some-waiting (cl-set-difference running reported)))
-          (let-alist (doom-modeline--flymake-count-errors)
-            (let* ((vsep (doom-modeline-vspc))
-                   (seg (if doom-modeline-check-simple-format
-                            (let ((count (+ .error .warning .note)))
-                              (cond
-                               (some-waiting (concat
-                                              (doom-modeline-check-icon "nf-md-timer_sand" "⏳" "*" 'doom-modeline-debug)
-                                              (when (> count 0)
-                                                (concat
-                                                 vsep
-                                                 (doom-modeline-check-text (number-to-string count) 'doom-modeline-debug)))))
-                               ((null known) (doom-modeline-check-icon "nf-md-alert_box_outline" "⚠" "!" 'doom-modeline-urgent))
-                               (all-disabled (doom-modeline-check-icon "nf-md-alert_box_outline" "⚠" "!" 'doom-modeline-warning))
-                               (t (if (> count 0)
-                                      (let ((face (cond ((> .error 0) 'doom-modeline-urgent)
-                                                        ((> .warning 0) 'doom-modeline-warning)
-                                                        (t 'doom-modeline-info))))
-                                        (concat
-                                         (doom-modeline-check-icon "nf-md-alert_circle_outline" "⚠" "!" face)
-                                         vsep
-                                         (doom-modeline-check-text (number-to-string count) face)))
-                                    (doom-modeline-check-icon "nf-md-check_circle_outline" "✔" "*" 'doom-modeline-info)))))
-                          (concat
-                           (doom-modeline-check-icon "nf-md-bug" "⮾" "!" 'mode-line)
-                           vsep
-                           (doom-modeline-check-text (number-to-string .error) 'mode-line)
-                           vsep
-                           (doom-modeline-check-text (number-to-string .warning) 'mode-line)
-                           vsep
-                           (doom-modeline-check-text (number-to-string .note) 'mode-line)))))
-              (propertize
-               seg
-               'help-echo (concat
-                           "Flymake\n"
-                           (cond (some-waiting "Checking...")
-                                 ((null known) "No Checker")
-                                 (all-disabled "All Checkers Disabled")
-                                 (t (format "%d/%d backends running\nerror: %d, warning: %d, note: %d"
-                                            (length running) (length known) .error .warning .note)))
-                           "\nmouse-1: Display minor mode menu\nmouse-2: Show help for minor mode")
-               'mouse-face 'doom-modeline-highlight
-               'local-map (let ((map (make-sparse-keymap)))
-                            (define-key map [mode-line down-mouse-1]
-                                        flymake-menu)
-                            (define-key map [mode-line mouse-2]
-                                        (lambda ()
-                                          (interactive)
-                                          (describe-function 'flymake-mode)))
-                            map)))))))
+;; (defun de/doom-modeline-update-flymake (&rest _)
+;;   "Update flymake."
+;;   (setq doom-modeline--flymake
+;;         (let* ((known (hash-table-keys flymake--state))
+;;                (running (flymake-running-backends))
+;;                (disabled (flymake-disabled-backends))
+;;                (reported (flymake-reporting-backends))
+;;                (all-disabled (and disabled (null running)))
+;;                (some-waiting (cl-set-difference running reported)))
+;;           (let-alist (doom-modeline--flymake-count-errors)
+;;             (let* ((vsep (doom-modeline-vspc))
+;;                    (seg (if doom-modeline-check-simple-format
+;;                             (let ((count (+ .error .warning .note)))
+;;                               (cond
+;;                                (some-waiting (concat
+;;                                               (doom-modeline-check-icon "nf-md-timer_sand" "⏳" "*" 'doom-modeline-debug)
+;;                                               (when (> count 0)
+;;                                                 (concat
+;;                                                  vsep
+;;                                                  (doom-modeline-check-text (number-to-string count) 'doom-modeline-debug)))))
+;;                                ((null known) (doom-modeline-check-icon "nf-md-alert_box_outline" "⚠" "!" 'doom-modeline-urgent))
+;;                                (all-disabled (doom-modeline-check-icon "nf-md-alert_box_outline" "⚠" "!" 'doom-modeline-warning))
+;;                                (t (if (> count 0)
+;;                                       (let ((face (cond ((> .error 0) 'doom-modeline-urgent)
+;;                                                         ((> .warning 0) 'doom-modeline-warning)
+;;                                                         (t 'doom-modeline-info))))
+;;                                         (concat
+;;                                          (doom-modeline-check-icon "nf-md-alert_circle_outline" "⚠" "!" face)
+;;                                          vsep
+;;                                          (doom-modeline-check-text (number-to-string count) face)))
+;;                                     (doom-modeline-check-icon "nf-md-check_circle_outline" "✔" "*" 'doom-modeline-info)))))
+;;                           (concat
+;;                            (doom-modeline-check-icon "nf-md-bug" "⮾" "!" 'mode-line)
+;;                            vsep
+;;                            (doom-modeline-check-text (number-to-string .error) 'mode-line)
+;;                            vsep
+;;                            (doom-modeline-check-text (number-to-string .warning) 'mode-line)
+;;                            vsep
+;;                            (doom-modeline-check-text (number-to-string .note) 'mode-line)))))
+;;               (propertize
+;;                seg
+;;                'help-echo (concat
+;;                            "Flymake\n"
+;;                            (cond (some-waiting "Checking...")
+;;                                  ((null known) "No Checker")
+;;                                  (all-disabled "All Checkers Disabled")
+;;                                  (t (format "%d/%d backends running\nerror: %d, warning: %d, note: %d"
+;;                                             (length running) (length known) .error .warning .note)))
+;;                            "\nmouse-1: Display minor mode menu\nmouse-2: Show help for minor mode")
+;;                'mouse-face 'doom-modeline-highlight
+;;                'local-map (let ((map (make-sparse-keymap)))
+;;                             (define-key map [mode-line down-mouse-1]
+;;                                         flymake-menu)
+;;                             (define-key map [mode-line mouse-2]
+;;                                         (lambda ()
+;;                                           (interactive)
+;;                                           (describe-function 'flymake-mode)))
+;;                             map)))))))
 
-(advice-add 'doom-modeline-update-flymake :override 'de/doom-modeline-update-flymake)
+;; (advice-add 'doom-modeline-update-flymake :override 'de/doom-modeline-update-flymake)
 ;; (advice-add #'flymake--handle-report :after #'doom-modeline-update-flymake)
 
 ;; (defvar-local doom-modeline--flycheck nil)
@@ -1323,6 +1329,15 @@ Remove stupid "rocket" (eglot section)
 (advice-add 'doom-modeline-update-eglot :override 'de/doom-modeline-update-eglot)
 #+END_SRC
 
+** Multiple cursors
+#+BEGIN_SRC emacs-lisp
+(use-package multiple-cursors
+ :ensure t
+ :config
+ (global-set-key (kbd "C-M-<down>") 'mc/mark-next-like-this)
+ (global-set-key (kbd "C-M-<up>") 'mc/mark-previous-like-this))
+#+END_SRC
+
 ** Native compilation
 https://protesilaos.com/emacs/dotemacs#h:3563ceb5-b70c-4191-9c81-f2f5a202c4da
 The --with-native-compilation=yes build option of Emacs is very nice: it enables the “native compilation” of Emacs Lisp, translating it down to machine code. However, the default setting for reporting errors is set to a verbose value which, in my coaching experience, confuses users: it produces warnings for compilation issues that only the developer of the given package needs to deal with. These include innocuous facts like docstrings being wider than a certain character count. To make things even worse, the buffer that shows these warnings uses the stop sign character, resulting in a long list of lines with red spots everywhere, as if we have totally broken Emacs.
@@ -1336,6 +1351,10 @@ The --with-native-compilation=yes build option of Emacs is very nice: it enables
 
 ** Nerd icons
 #+BEGIN_SRC emacs-lisp
+(use-package all-the-icons
+  :ensure t
+  :if (display-graphic-p))
+
 (use-package nerd-icons
   :ensure t
   :config
@@ -1344,12 +1363,6 @@ The --with-native-compilation=yes build option of Emacs is very nice: it enables
 
   (add-to-list 'nerd-icons-extension-icon-alist
                '("doom-modeline-urgent" nerd-icons-sucicon "nf-seti-go" :face nerd-icons-blue))
-
-  (add-to-list 'nerd-icons-extension-icon-alist
-               '("doom-modeline-warning" nerd-icons-sucicon "nf-seti-go" :face nerd-icons-blue))
-
-  (add-to-list 'nerd-icons-extension-icon-alist
-               '("doom-modeline-info" nerd-icons-sucicon "nf-seti-go" :face nerd-icons-blue))
 
   (advice-add #'doom-modeline-warning :override
               (defun doom-modeline-warning+ (text face)
@@ -1546,6 +1559,11 @@ For daemon mode
   :ensure t)
 #+END_SRC
 
+** Selection
+#+BEGIN_SRC emacs-lisp
+(setq select-enable-clipboard nil)
+#+END_SRC
+
 ** Spaces/Tabs
 #+BEGIN_SRC emacs-lisp
   (progn
@@ -1621,6 +1639,24 @@ For daemon mode
              ((lambda (tag) (svg-tag-make "DONE" :face 'de/tag-done)))))))
 #+END_SRC
 
+** Terraform
+#+BEGIN_SRC emacs-lisp
+(use-package terraform-mode
+  ;; if using straight
+  ;; :straight t
+
+  ;; if using package.el
+  :ensure t
+  :custom (terraform-indent-level 4)
+  :config
+  (defun my-terraform-mode-init ()
+    ;; if you want to use outline-minor-mode
+    ;; (outline-minor-mode 1)
+    )
+
+  (add-hook 'terraform-mode-hook 'my-terraform-mode-init))
+#+END_SRC
+
 ** Tooltip
 Show tooltips in echo area.
 #+BEGIN_SRC emacs-lisp
@@ -1628,6 +1664,39 @@ Show tooltips in echo area.
 #+END_SRC
 
 ** Tramp
+#+BEGIN_SRC emacs-lisp
+(use-package tramp
+  :straight (:type built-in)
+  :config
+  ;; To speed up connections
+  (setq tramp-verbose 0
+        tramp-chunksize 2000
+        tramp-use-ssh-controlmaster-options nil
+        tramp-default-method "ssh"
+        tramp-verbose 1
+        tramp-default-remote-shell "/bin/sh"
+        tramp-connection-local-default-shell-variables
+        '((shell-file-name . "/bin/bash")
+          (shell-command-switch . "-c")))
+  ;; For ~/.local/bin etc. to work when SSHing
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+)
+
+(setq remote-file-name-inhibit-locks t
+      tramp-use-scp-direct-remote-copying t
+      remote-file-name-inhibit-auto-save-visited t)
+
+(connection-local-set-profile-variables
+ 'remote-direct-async-process
+ '((tramp-direct-async-process . t)))
+
+(connection-local-set-profiles
+ '(:application tramp :protocol "scp")
+ 'remote-direct-async-process)
+
+(setq magit-tramp-pipe-stty-settings 'pty)
+#+END_SRC
+
 Getting tramp to work on Windows
 https://stewart123579.github.io/blog/posts/emacs/emacs-on-windows-getting-tramp-to-work/
 #+BEGIN_SRC emacs-lisp
@@ -1647,6 +1716,13 @@ https://emacs.stackexchange.com/questions/74651/how-to-configure-eglot-over-tram
 #+BEGIN_SRC emacs-lisp
   (when (eq system-type 'windows-nt)
     (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
+#+END_SRC
+
+Disable projectile in tramp
+#+BEGIN_SRC emacs-lisp
+(advice-add 'projectile-project-root :before-while
+  (lambda (&optional dir)
+    (not (file-remote-p (or dir default-directory)))))
 #+END_SRC
 
 ** Tree-sitter
@@ -1737,5 +1813,4 @@ https://andrewjamesjohnson.com/suppressing-ad-handle-definition-warnings-in-emac
 #+BEGIN_SRC emacs-lisp
   (setq ad-redefinition-action 'accept)
 #+END_SRC
-
 
